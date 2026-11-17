@@ -1,98 +1,188 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { router } from 'expo-router';
+import {
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import type { ExerciseCardProps } from '../types';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+/** Cartão de acesso a um exercício. */
+function ExerciseCard({
+  number,
+  title,
+  description,
+  technologies,
+  onPress,
+}: ExerciseCardProps) {
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Abrir exercício ${number}: ${title}`}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.exerciseCard,
+        pressed && styles.pressedCard,
+      ]}
+    >
+      <View style={styles.cardHeader}>
+        <Text style={styles.exerciseNumber}>EXERCÍCIO {number}</Text>
+        <Text style={styles.arrow}>→</Text>
+      </View>
+
+      <Text style={styles.exerciseTitle}>{title}</Text>
+
+      <Text style={styles.exerciseDescription}>{description}</Text>
+
+      <View style={styles.technologiesContainer}>
+        <Text style={styles.technologiesText}>{technologies}</Text>
+      </View>
+
+      <Text style={styles.openText}>Abrir exercício</Text>
+    </Pressable>
   );
 }
 
+/** Menu inicial com acesso aos dois exercícios. */
 export default function HomeScreen() {
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.subtitle}>PRÁTICA COM EXPO</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          <Text style={styles.title}>Recursos nativos</Text>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+          <Text style={styles.description}>
+            Escolha um exercício para explorar os recursos do dispositivo.
+          </Text>
+        </View>
+
+        <View style={styles.exerciseList}>
+          <ExerciseCard
+            number="01"
+            title="Cartão de visita"
+            description="Acesse os contatos, compartilhe o cartão e veja como chegar."
+            technologies="Haptics · Share · Linking"
+            onPress={() => router.push('/business-card')}
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <ExerciseCard
+            number="02"
+            title="Onde estou?"
+            description="Descubra sua posição, consulte as coordenadas e visualize no mapa."
+            technologies="Location · Linking"
+            onPress={() => router.push('/location')}
+          />
+        </View>
+
+        <Text style={styles.footer}>
+          Desenvolvimento mobile com React Native e TypeScript
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingVertical: 32,
+    backgroundColor: '#F4F6F1',
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  content: {
+    width: '100%',
+    maxWidth: 480,
+    alignSelf: 'center',
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  header: {
+    marginBottom: 28,
+  },
+  subtitle: {
+    marginBottom: 10,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.5,
+    color: '#527D2C',
   },
   title: {
+    marginBottom: 12,
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#252B2F',
+  },
+  description: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#747B80',
+  },
+  exerciseList: {
+    gap: 18,
+  },
+  exerciseCard: {
+    padding: 24,
+    borderWidth: 1,
+    borderColor: '#E0E7D8',
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+  },
+  pressedCard: {
+    opacity: 0.8,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  exerciseNumber: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: '#527D2C',
+  },
+  arrow: {
+    fontSize: 26,
+    color: '#527D2C',
+  },
+  exerciseTitle: {
+    marginBottom: 10,
+    fontSize: 23,
+    fontWeight: '700',
+    color: '#252B2F',
+  },
+  exerciseDescription: {
+    marginBottom: 18,
+    fontSize: 15,
+    lineHeight: 23,
+    color: '#747B80',
+  },
+  technologiesContainer: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#EEF4E7',
+  },
+  technologiesText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#527D2C',
+  },
+  openText: {
+    marginTop: 22,
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#527D2C',
+  },
+  footer: {
+    marginTop: 28,
+    fontSize: 12,
+    lineHeight: 18,
     textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+    color: '#747B80',
   },
 });
